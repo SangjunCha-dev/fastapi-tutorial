@@ -1,7 +1,8 @@
 # CRUD utils
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+# from . import models, schemas
+import models, schemas
 
 
 # Read data
