@@ -1,5 +1,7 @@
 # cache
 __pycache__/
+*.db
+*.txt
 
 
 # venv
