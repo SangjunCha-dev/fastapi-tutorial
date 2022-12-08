@@ -5,6 +5,13 @@ Peewee를 사용한 SQL(관계형) 데이터베이스
 > Peewee를 안전하게 사용하려면 Python 3.7 이상 필요
 
 
+## 라이브러리 설치
+
+```
+pip install peewee
+```
+
+
 ## Peewee for async
 
 - 비동기 프레임워크용으로 설계되지 않음
@@ -42,6 +49,19 @@ pydantic에서 상속하는 사용자 정의클래스를 제공하여 ORM 모델
     class Config:
         orm_mode = True
         getter_dict = peeweeGetterDict
+```
+
+
+## About def vs async def
+
+async
+```
+user = await models.User.select().first()
+```
+
+sync
+```
+user = models.User.select().first()
 ```
 
 
