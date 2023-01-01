@@ -1,0 +1,1 @@
+{"id":"9a024639-d95a-411c-bfed-2d9f2651c425","space":48334,"runtime":"python3.9","name":"fastapideta","path":"qi4ltf","project":"b07hrdfd","account":"144798365827","region":"us-east-1","deps":["fastapi"],"envs":null,"public":false,"log_level":"debug","cron":""}
