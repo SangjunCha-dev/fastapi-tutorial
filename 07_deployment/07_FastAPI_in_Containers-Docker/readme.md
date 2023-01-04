@@ -59,6 +59,59 @@ Image
 - 컨테이너는 일반적으로 단일 프로세스가 있지만 기본 프로세스에서 하위 프로세스를 시작하는 것도 가능하므로 동일한 컨테이너에 여러 프로세스가 있음
 
 
+## Build a Docker Image for FastAPI
+
+### Package Requirements
+
+패키지 요구사항 작성
+
+requirements.txt
+
+```
+fastapi>=0.68.0,<0.69.0
+pydantic>=1.8.0,<2.0.0
+uvicorn>=0.15.0,<0.16.0
+```
+
+패키지 종속성 설치
+
+```
+pip install -r requirements.txt
+```
+
+### Behind a TLS Termination Proxy
+
+TLS 종료 프록시 뒤에 컨테이너를 실행하는 경우 프록시 옵션을 추가하여 uvicorn 실행
+- --proxy-headers 해당 프록시에서 보낸 헤더를 신뢰하고 응용 프로그램이 HTTPS 등에서 실행되고 있음을 알림
+
+```
+CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80"]
+```
+
+### Build the Docker Image
+
+1. 프로젝트 디렉토리로 이동
+2. 도커 이미지 빌드 `docker build -t myimage .`
+
+### Start the Docker Container
+
+도커 컨테이너 실행
+
+```
+$ docker run -d --name mycontainer -p 80:80 myimage
+```
+
+접속
+
+```
+request
+http://127.0.0.1/items/5?q=somequery
+
+response
+{"item_id": 5, "q": "somequery"}
+```
+
+
 ## 참조 Docs
 
 - https://fastapi.tiangolo.com/deployment/docker/
