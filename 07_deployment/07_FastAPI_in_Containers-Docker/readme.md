@@ -112,6 +112,81 @@ response
 ```
 
 
+## Deployment Concepts
+
+- HTTPS
+- 시작시 실행
+- 재시작
+- 복제(실행 중인 프로세스 수)
+- 메모리
+- 시작하기 전 이전 단계
+
+
+## HTTPS
+
+[Traefik](https://traefik.io/)
+
+
+## Running on Startup and Restarts
+
+컨테이너 시작 및 실행을 담당하는 도구
+
+- Docker 직접 실행
+- Docker Compose
+- Kubernetes
+- 클라우드 서비스 등
+
+Docker의 재시작 옵션 `--restart`
+
+대부분의 경우 컨테이너로 작업할 때 재시작 기능이 기본적으로 포함됨
+
+
+## Replication - Number of Processes
+
+Kubernetes와 같은 분산 컨테이너 관리 시스템은 일반적으로 들어오는 요청에 대한 로드 밸런싱을 지원하면서 컨테이너 복제를 처리하는 통합 방법으로 동작함(클러스터 수준)
+
+이러한 경우 Uvicorn, Gunicorn 같은 프록시 서버를 실행하는 대신 Docker 이미지를 처음부터 빌드하고 종속성을 설치하고 단일 Uvicorn 프로세스를 실행함
+
+
+## Load Balancer
+
+로드 밸런서는 작업자 간에 균형잡힌 방식으로 요청을 배포하므로 부하를 분산 처리함
+
+
+## One Load Balancer - Multiple Worker Containers
+
+Kubernetes 같은 분산 컨테이너 관리 시스템으로 작업할 때 내부 네트워킹 메커니즘을 사용하면 단일 포트에서 수신하는 단일 로드 밸런서가 앱을 실행하는 여러 컨테이너의 통신을 전송할 수 있음
+
+- 앱을 실행하는 각 컨테이너는 일반적으로 하나의 프로세스로 동작함
+- 모두 동일한 컨테이너이며 동일한 서버를 실행하지만 각각 고유한 프로세스, 메모리 등을 가지고 있음
+- CPU의 다른 코어 또는 다른 시스템에서도 병렬화 활용할 수 있음
+- 따라서 각 요청은 앱을 실행하는 여러 복제 컨테이너 중 하나에서 처리할 수 있음
+
+로드 밸런서는 클러스터의 다른 앱(도메인, URL 경로 접두사 등)으로 이동하는 요청을 처리할 수 있음
+
+
+## One Process per Container
+
+컨테이너 내부에 또 다른 프로세스 관리자가 있으면 불필요한 복잡성만 추가되므로 컨테이너 내부에서는 단일 프로세스로만 동작하는것이 좋음
+
+
+## Containers with Multiple Processes and Special Cases
+
+내부에서 여러 Uvicorn 작업자 프로세스를 시작하는 Gunicorn 프로세스 관리자가 있는 컨테이너 같은 특별한 경우
+
+일부 기본 설정을 사용하여 현재 CPU 코어를 기반으로 작업자 수를 자동으로 조정할 수 있음
+
+[Official Docker Image with Gunicorn - Uvicorn](https://fastapi.tiangolo.com/deployment/docker/#official-docker-image-with-gunicorn-uvicorn)
+
+### A Simple App
+
+애플리케이션이 간단하여 프로세스 수를 미세 조정할 필요없고 자동화된 기본값으로 클러스터가 아닌 단일 서버에서 실행하는 경우
+
+### Docker Compose
+
+Docker Compose를 사용하여 단일 서버(클러스터 아님)에 배포할 수 있으므로 공유 네트워크 및 로드 밸런싱을 유지하면서 컨테이너 복제(Docker Compose 사용)를 쉽게 관리할 수 있음
+
+
 ## 참조 Docs
 
 - https://fastapi.tiangolo.com/deployment/docker/
