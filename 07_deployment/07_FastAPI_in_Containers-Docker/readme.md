@@ -187,6 +187,32 @@ Kubernetes 같은 분산 컨테이너 관리 시스템으로 작업할 때 내�
 Docker Compose를 사용하여 단일 서버(클러스터 아님)에 배포할 수 있으므로 공유 네트워크 및 로드 밸런싱을 유지하면서 컨테이너 복제(Docker Compose 사용)를 쉽게 관리할 수 있음
 
 
+## Memory
+
+컨테이너당 단일 프로세스를 실행하는 경우 각 컨테이너에서 소비되는 메모리 양은 제한하여 사용할 수 있음
+
+컨테이너 관리 시스템(Kubenetes 등)에서 컨테이너에 대한 동일한 메모리 제한 및 요구사항을 설정할 수 있음
+
+컨테이너당 여러 프로세스를 실행하는 경우 프로세스가 사용 가능한 것보다 많은 메모리를 사용하지 않도록 해야함
+
+
+## Previous Steps Before Starting and Containers
+
+컨테이너를 사용하는 경우 2가지 접근방식이 있음
+
+### Multiple Containers
+
+여러 컨테이너가 있고 각각 단일 프로세스(Kubernetes 클러스터)를 실행하는 경우 이전 단계의 작업(예: 데이터베이스 마이그레이션 등)을 수행하는 별도의 컨테이너가 필요할 수 있음
+
+[described above in: Build a Docker Image for FastAPI](https://fastapi.tiangolo.com/deployment/docker/#build-a-docker-image-for-fastapi)
+
+예시에서 이전 단계를 병렬로 여러번 실행하는데 문제가 없는 경우(예: 데이터베이스 마이그레이션을 실행하지 않고 데이터베이스가 준비되었는지 확인하는 경우) 각 컨테이너에서 실행해도 괜찮음
+
+### Single Container
+
+단일 컨테이너를 사용하여 여러 작업자 프로세스를 시작하는 간단한 설정이 있는 경우 앱으로 프로세스를 시작하기 직전에 동일한 컨테이너에서 이전 단계를 실행할 수 있음
+
+
 ## 참조 Docs
 
 - https://fastapi.tiangolo.com/deployment/docker/
