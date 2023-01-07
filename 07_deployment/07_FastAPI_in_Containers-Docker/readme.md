@@ -213,6 +213,112 @@ Docker Compose를 사용하여 단일 서버(클러스터 아님)에 배포할 �
 단일 컨테이너를 사용하여 여러 작업자 프로세스를 시작하는 간단한 설정이 있는 경우 앱으로 프로세스를 시작하기 직전에 동일한 컨테이너에서 이전 단계를 실행할 수 있음
 
 
+## Official Docker Image with Gunicorn - Uvicorn
+
+Gunicorn, Uvicorn 포함된 공식 Docker 이미지
+
+[Server Workers - Gunicorn with Uvicorn](https://fastapi.tiangolo.com/deployment/server-workers/)
+
+### Number of Processes on the Official Docker Image
+
+해당 이미지의 프로세스 수는 사용가능한 CPU 코어를 자동으로 계산함
+- 환경 변수등을 사용하여 구성 조정 가능함
+
+### Create a Dockerfile
+
+도커 공식 이미지를 기반으로 이미지를 만드는 방법
+
+```
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+
+COPY ./requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+COPY ./app /app
+```
+
+### Bigger Applications
+
+[Bigger Applications with Multiple Files](https://fastapi.tiangolo.com/tutorial/bigger-applications/)
+
+```
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+
+COPY ./requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+COPY ./app /app/app
+```
+
+### When to Use
+
+Kubernetes를 사용 중이고 여러 컨테이너를 사용하여 클러스터 수준에서 복제를 설정하고 있는 경우 이 공식 이미지를 사용하지 않고 직접 [Build a Docker Image for FastAPI](https://fastapi.tiangolo.com/deployment/docker/#build-a-docker-image-for-fastapi) 처음부터 이미지를 빌드하는 것이 좋음
+
+
+## Deploy the Container Image
+
+컨테이너(Docker) 이미지가 있으면 여러 가지 방법으로 배포할 수 있음
+
+- 단일 서버에서 Docker Compose 사용
+- Kubernetes 클러스터 사용
+- Docker Swarm 모드 클러스터 사용
+- Nomad와 같은 다른 도구
+- 컨테이너 이미지를 가져와 배포하는 클라우드 서비스
+
+
+## Docker Image with Poetry
+
+```
+FROM python:3.9 as requirements-stage
+
+WORKDIR /tmp
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock* /tmp/
+
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+FROM python:3.9
+
+WORKDIR /code
+
+COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY ./app /code/app
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+```
+
+최종 컨테이너 이미지는 프로젝트 종속성만 설치된 이미지만 남음
+
+### Behind a TLS Termination Proxy - Poetry
+
+Nginx 또는 Traefik 같은 TLS Termination Proxy(로드 밸런서) 뒤에서 컨테이너를 실행하는 `--proxy-headers` 경우 명령에 옵션을 추가하여 실행
+
+```
+CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80"]
+```
+
+
+## 요약
+
+컨테이너 시스템(Docker 및 Kubernetes 등)을 사용하면 모든 배포 개념을 처리하는 것이 매우 간단해짐
+
+- HTTPS
+- 시작시 실행
+- 재시작
+- 복제(실행 프로세스 수)
+- 메모리
+- 시작하기 전 이전 단계
+
+Docker 명령 순서를 통해 캐시를 관리하면 빌드시간을 최소화하여 생산성을 극대화 할수 있음
+
+
 ## 참조 Docs
 
 - https://fastapi.tiangolo.com/deployment/docker/
